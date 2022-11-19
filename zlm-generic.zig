@@ -1,5 +1,15 @@
 const std = @import("std");
 
+fn VectorType(comptime Real: type, comptime i: usize) type {
+    return switch (i) {
+        1 => Real,
+        2 => SpecializeOn(Real).Vec2,
+        3 => SpecializeOn(Real).Vec3,
+        4 => SpecializeOn(Real).Vec4,
+        else => @compileError("Vectors can only take up to 4 elements!"),
+    };
+}
+
 /// Makes all vector and matrix types generic against Real
 pub fn SpecializeOn(comptime Real: type) type {
     return struct {
@@ -19,10 +29,12 @@ pub fn SpecializeOn(comptime Real: type) type {
         /// Reduces the amount of duplicated code by a lot
         fn VectorMixin(comptime Self: type) type {
             return struct {
+                const fields = @typeInfo(Self).Struct.fields;
+
                 /// Initializes all values of the vector with the given value.
                 pub fn all(value: Real) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = value;
                     }
                     return result;
@@ -31,7 +43,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// adds all components from `a` with the components of `b`.
                 pub fn add(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) + @field(b, fld.name);
                     }
                     return result;
@@ -40,7 +52,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// subtracts all components from `a` with the components of `b`.
                 pub fn sub(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) - @field(b, fld.name);
                     }
                     return result;
@@ -49,7 +61,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// multiplies all components from `a` with the components of `b`.
                 pub fn mul(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) * @field(b, fld.name);
                     }
                     return result;
@@ -58,7 +70,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// divides all components from `a` by the components of `b`.
                 pub fn div(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) / @field(b, fld.name);
                     }
                     return result;
@@ -67,7 +79,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// divides all components by a scalar value.
                 pub fn div_scalar(a: Self, b: Real) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) / b;
                     }
                     return result;
@@ -76,7 +88,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// multiplies all components by a scalar value.
                 pub fn scale(a: Self, b: Real) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @field(a, fld.name) * b;
                     }
                     return result;
@@ -86,7 +98,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// This is the sum of products of all components.
                 pub fn dot(a: Self, b: Self) Real {
                     var result: Real = 0;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         result += @field(a, fld.name) * @field(b, fld.name);
                     }
                     return result;
@@ -125,8 +137,17 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// applies component-wise absolute values
                 pub fn abs(a: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @fabs(@field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// applies component-wise sign-only values
+                pub fn sign(a: Self) Self {
+                    var result: Self = undefined;
+                    inline for (fields) |fld| {
+                        @field(result, fld.name) = std.math.sign(@field(a, fld.name));
                     }
                     return result;
                 }
@@ -134,7 +155,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// applies component-wise floored (round towards negative-infinity) values
                 pub fn floor(a: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @floor(@field(a, fld.name));
                     }
                     return result;
@@ -143,7 +164,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// applies component-wise ceiled (round towards positive-infinity) values
                 pub fn ceil(a: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @ceil(@field(a, fld.name));
                     }
                     return result;
@@ -152,7 +173,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// applies component-wise rounded values
                 pub fn round(a: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @round(@field(a, fld.name));
                     }
                     return result;
@@ -161,7 +182,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// applies component-wise trunced (round towards zero) values
                 pub fn trunc(a: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = @trunc(@field(a, fld.name));
                     }
                     return result;
@@ -211,10 +232,30 @@ pub fn SpecializeOn(comptime Real: type) type {
                     return result;
                 }
 
+                /// returns a new vector where each component is casted to a new vector with a new type
+                /// regardless of if the new type can represent the value without losing data
+                pub fn lossyCast(a: Self, comptime T: type) VectorType(T, fields.len) {
+                    var result: VectorType(T, fields.len) = undefined;
+                    inline for (fields) |fld| {
+                        @field(result, fld.name) = std.math.lossyCast(T, @field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// returns a new vector where each component is interpreted to a new type
+                /// while the binary data in memory stays the same
+                pub fn bitCast(a: Self, comptime T: type) VectorType(T, fields.len) {
+                    var result: VectorType(T, fields.len) = undefined;
+                    inline for (fields) |fld| {
+                        @field(result, fld.name) = @bitCast(T, @field(a, fld.name));
+                    }
+                    return result;
+                }
+
                 /// returns a new vector where each component is the minimum of the components of the input vectors.
                 pub fn componentMin(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = std.math.min(@field(a, fld.name), @field(b, fld.name));
                     }
                     return result;
@@ -223,7 +264,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 /// returns a new vector where each component is the maximum of the components of the input vectors.
                 pub fn componentMax(a: Self, b: Self) Self {
                     var result: Self = undefined;
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         @field(result, fld.name) = std.math.max(@field(a, fld.name), @field(b, fld.name));
                     }
                     return result;
@@ -236,7 +277,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 }
 
                 pub fn eql(a: Self, b: Self) bool {
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         if (@field(a, fld.name) != @field(b, fld.name))
                             return false;
                     }
@@ -244,7 +285,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 }
 
                 pub fn approxEqAbs(a: Self, b: Self, tolerance: Real) bool {
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         if (!std.math.approxEqAbs(Real, @field(a, fld.name), @field(b, fld.name), tolerance))
                             return false;
                     }
@@ -252,7 +293,7 @@ pub fn SpecializeOn(comptime Real: type) type {
                 }
 
                 pub fn approxEqRel(a: Self, b: Self, tolerance: Real) bool {
-                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                    inline for (fields) |fld| {
                         if (!std.math.approxEqRel(Real, @field(a, fld.name), @field(b, fld.name), tolerance))
                             return false;
                     }
@@ -260,7 +301,6 @@ pub fn SpecializeOn(comptime Real: type) type {
                 }
 
                 pub fn get(a: Self, i: usize) Real {
-                    const fields = @typeInfo(Self).Struct.fields;
                     return switch (i) {
                         inline 0...fields.len - 1 => |idx| @field(a, fields[idx].name),
                         else => unreachable,
@@ -268,7 +308,6 @@ pub fn SpecializeOn(comptime Real: type) type {
                 }
 
                 pub fn set(a: *Self, i: usize, value: Real) void {
-                    const fields = @typeInfo(Self).Struct.fields;
                     switch (i) {
                         inline 0...fields.len - 1 => |idx| @field(a, fields[idx].name) = value,
                         else => unreachable,

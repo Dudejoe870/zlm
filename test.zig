@@ -49,6 +49,7 @@ test "vec2 arithmetics" {
     assert(std.meta.eql(Vec2.sub(a, b), vec2(1, -1)));
     assert(std.meta.eql(Vec2.mul(a, b), vec2(2, 2)));
     assert(std.meta.eql(Vec2.div(a, b), vec2(2, 0.5)));
+    assert(std.meta.eql(Vec2.div_scalar(a, 2.0), vec2(1, 0.5)));
     assert(std.meta.eql(Vec2.scale(a, 2.0), vec2(4, 2)));
 
     assert(Vec2.dot(a, b) == 4.0);
@@ -66,6 +67,7 @@ test "vec3 arithmetics" {
     assert(std.meta.eql(Vec3.sub(a, b), vec3(1, -1, 0)));
     assert(std.meta.eql(Vec3.mul(a, b), vec3(2, 2, 9)));
     assert(std.meta.eql(Vec3.div(a, b), vec3(2, 0.5, 1)));
+    assert(std.meta.eql(Vec3.div_scalar(a, 2.0), vec3(1, 0.5, 1.5)));
     assert(std.meta.eql(Vec3.scale(a, 2.0), vec3(4, 2, 6)));
 
     assert(Vec3.dot(a, b) == 13.0);
@@ -84,7 +86,8 @@ test "vec4 arithmetics" {
     assert(std.meta.eql(Vec4.add(a, b), vec4(3, 3, 7, 7)));
     assert(std.meta.eql(Vec4.sub(a, b), vec4(1, -1, 1, -1)));
     assert(std.meta.eql(Vec4.mul(a, b), vec4(2, 2, 12, 12)));
-    assert(std.meta.eql(Vec4.div(a, b), vec4(2, 0.5, 4.0 / 3.0, 3.0 / 4.0)));
+    assert(std.meta.eql(Vec4.div(a, b), vec4(2, 0.5, 4.0 / 3.0, 0.75)));
+    assert(std.meta.eql(Vec4.div_scalar(a, 2.0), vec4(1, 0.5, 2.0, 1.5)));
     assert(std.meta.eql(Vec4.scale(a, 2.0), vec4(4, 2, 8, 6)));
 
     assert(Vec4.dot(a, b) == 28.0);
@@ -277,4 +280,34 @@ test "vec4 set" {
     vec.set(2, 7);
     vec.set(3, 5);
     assert(std.meta.eql(vec4(3, 6, 7, 5), vec));
+}
+
+test "vec2 cast" {
+    const vec = vec2(0.5, 8.0);
+    assert(std.meta.eql(vec.lossyCast(i32), math.SpecializeOn(i32).vec2(0, 8)));
+    assert(std.meta.eql(vec.bitCast(u32), math.SpecializeOn(u32).vec2(
+        @bitCast(u32, @as(f32, 0.5)), 
+        @bitCast(u32, @as(f32, 8.0)))));
+    assert(std.meta.eql(vec.lossyCast(f16), math.SpecializeOn(f16).vec2(0.5, 8.0)));
+}
+
+test "vec3 cast" {
+    const vec = vec3(0.5, 8.0, -8.0);
+    assert(std.meta.eql(vec.lossyCast(i32), math.SpecializeOn(i32).vec3(0, 8, -8)));
+    assert(std.meta.eql(vec.bitCast(u32), math.SpecializeOn(u32).vec3(
+        @bitCast(u32, @as(f32, 0.5)), 
+        @bitCast(u32, @as(f32, 8.0)),
+        @bitCast(u32, @as(f32, -8.0)))));
+    assert(std.meta.eql(vec.lossyCast(f16), math.SpecializeOn(f16).vec3(0.5, 8.0, -8.0)));
+}
+
+test "vec4 cast" {
+    const vec = vec4(0.5, -256.0, -8.0, -0.5);
+    assert(std.meta.eql(vec.lossyCast(i8), math.SpecializeOn(i8).vec4(0, std.math.minInt(i8), -8, 0)));
+    assert(std.meta.eql(vec.bitCast(u32), math.SpecializeOn(u32).vec4(
+        @bitCast(u32, @as(f32, 0.5)), 
+        @bitCast(u32, @as(f32, -256.0)),
+        @bitCast(u32, @as(f32, -8.0)),
+        @bitCast(u32, @as(f32, -0.5)))));
+    assert(std.meta.eql(vec.lossyCast(f16), math.SpecializeOn(f16).vec4(0.5, -256.0, -8.0, -0.5)));
 }
