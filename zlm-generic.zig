@@ -64,6 +64,15 @@ pub fn SpecializeOn(comptime Real: type) type {
                     return result;
                 }
 
+                /// divides all components by a scalar value.
+                pub fn div_scalar(a: Self, b: Real) Self {
+                    var result: Self = undefined;
+                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                        @field(result, fld.name) = @field(a, fld.name) / b;
+                    }
+                    return result;
+                }
+
                 /// multiplies all components by a scalar value.
                 pub fn scale(a: Self, b: Real) Self {
                     var result: Self = undefined;
@@ -117,7 +126,43 @@ pub fn SpecializeOn(comptime Real: type) type {
                 pub fn abs(a: Self) Self {
                     var result: Self = undefined;
                     inline for (@typeInfo(Self).Struct.fields) |fld| {
-                        @field(result, fld.name) = std.math.fabs(@field(a, fld.name));
+                        @field(result, fld.name) = @fabs(@field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// applies component-wise floored (round towards negative-infinity) values
+                pub fn floor(a: Self) Self {
+                    var result: Self = undefined;
+                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                        @field(result, fld.name) = @floor(@field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// applies component-wise ceiled (round towards positive-infinity) values
+                pub fn ceil(a: Self) Self {
+                    var result: Self = undefined;
+                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                        @field(result, fld.name) = @ceil(@field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// applies component-wise rounded values
+                pub fn round(a: Self) Self {
+                    var result: Self = undefined;
+                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                        @field(result, fld.name) = @round(@field(a, fld.name));
+                    }
+                    return result;
+                }
+
+                /// applies component-wise trunced (round towards zero) values
+                pub fn trunc(a: Self) Self {
+                    var result: Self = undefined;
+                    inline for (@typeInfo(Self).Struct.fields) |fld| {
+                        @field(result, fld.name) = @trunc(@field(a, fld.name));
                     }
                     return result;
                 }
@@ -212,6 +257,22 @@ pub fn SpecializeOn(comptime Real: type) type {
                             return false;
                     }
                     return true;
+                }
+
+                pub fn get(a: Self, i: usize) Real {
+                    const fields = @typeInfo(Self).Struct.fields;
+                    return switch (i) {
+                        inline 0...fields.len - 1 => |idx| @field(a, fields[idx].name),
+                        else => unreachable,
+                    };
+                }
+
+                pub fn set(a: *Self, i: usize, value: Real) void {
+                    const fields = @typeInfo(Self).Struct.fields;
+                    switch (i) {
+                        inline 0...fields.len - 1 => |idx| @field(a, fields[idx].name) = value,
+                        else => unreachable,
+                    }
                 }
             };
         }

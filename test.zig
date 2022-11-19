@@ -236,3 +236,45 @@ test "vec4 swizzle" {
     assert(std.meta.eql(vec4(3, 4, 2, 1), vec4(1, 2, 3, 4).swizzle("zwyx")));
     assert(std.meta.eql(@as(f32, 3), vec4(1, 2, 3, 4).swizzle("z")));
 }
+
+test "vec2 get" {
+    assert(vec2(3, 6).get(0) == 3);
+    assert(vec2(3, 6).get(1) == 6);
+}
+
+test "vec3 get" {
+    assert(vec3(3, 6, 5).get(0) == 3);
+    assert(vec3(3, 6, 5).get(1) == 6);
+    assert(vec3(3, 6, 5).get(2) == 5);
+}
+
+test "vec4 get" {
+    assert(vec4(3, 6, 5, 4).get(0) == 3);
+    assert(vec4(3, 6, 5, 4).get(1) == 6);
+    assert(vec4(3, 6, 5, 4).get(2) == 5);
+    assert(vec4(3, 6, 5, 4).get(3) == 4);
+}
+
+test "vec2 set" {
+    var vec = Vec2.zero;
+    vec.set(0, 3);
+    vec.set(1, 6);
+    assert(std.meta.eql(vec2(3, 6), vec));
+}
+
+test "vec3 set" {
+    var vec = Vec3.zero;
+    vec.set(0, 3);
+    vec.set(1, 6);
+    vec.set(2, 7);
+    assert(std.meta.eql(vec3(3, 6, 7), vec));
+}
+
+test "vec4 set" {
+    var vec = Vec4.zero;
+    vec.set(0, 3);
+    vec.set(1, 6);
+    vec.set(2, 7);
+    vec.set(3, 5);
+    assert(std.meta.eql(vec4(3, 6, 7, 5), vec));
+}
