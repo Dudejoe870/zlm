@@ -50,7 +50,6 @@ test "vec2 arithmetics" {
     try expect(std.meta.eql(Vec2.sub(a, b), vec2(1, -1)));
     try expect(std.meta.eql(Vec2.mul(a, b), vec2(2, 2)));
     try expect(std.meta.eql(Vec2.div(a, b), vec2(2, 0.5)));
-    try expect(std.meta.eql(Vec2.div_scalar(a, 2.0), vec2(1, 0.5)));
     try expect(std.meta.eql(Vec2.scale(a, 2.0), vec2(4, 2)));
 
     try expect(Vec2.dot(a, b) == 4.0);
@@ -68,7 +67,6 @@ test "vec3 arithmetics" {
     try expect(std.meta.eql(Vec3.sub(a, b), vec3(1, -1, 0)));
     try expect(std.meta.eql(Vec3.mul(a, b), vec3(2, 2, 9)));
     try expect(std.meta.eql(Vec3.div(a, b), vec3(2, 0.5, 1)));
-    try expect(std.meta.eql(Vec3.div_scalar(a, 2.0), vec3(1, 0.5, 1.5)));
     try expect(std.meta.eql(Vec3.scale(a, 2.0), vec3(4, 2, 6)));
 
     try expect(Vec3.dot(a, b) == 13.0);
@@ -88,7 +86,6 @@ test "vec4 arithmetics" {
     try expect(std.meta.eql(Vec4.sub(a, b), vec4(1, -1, 1, -1)));
     try expect(std.meta.eql(Vec4.mul(a, b), vec4(2, 2, 12, 12)));
     try expect(std.meta.eql(Vec4.div(a, b), vec4(2, 0.5, 4.0 / 3.0, 0.75)));
-    try expect(std.meta.eql(Vec4.div_scalar(a, 2.0), vec4(1, 0.5, 2.0, 1.5)));
     try expect(std.meta.eql(Vec4.scale(a, 2.0), vec4(4, 2, 8, 6)));
 
     try expect(Vec4.dot(a, b) == 28.0);
