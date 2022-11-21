@@ -76,11 +76,29 @@ pub fn SpecializeOn(comptime Real: type) type {
                     return result;
                 }
 
-                /// divides all components by a scalar value.
-                pub fn div_scalar(a: Self, b: Real) Self {
+                /// @divExacts all components from `a` by the components of `b`.
+                pub fn div_exact(a: Self, b: Self) Self {
                     var result: Self = undefined;
                     inline for (fields) |fld| {
-                        @field(result, fld.name) = @field(a, fld.name) / b;
+                        @field(result, fld.name) = @divExact(@field(a, fld.name), @field(b, fld.name));
+                    }
+                    return result;
+                }
+
+                /// @divFloors all components from `a` by the components of `b`.
+                pub fn div_floor(a: Self, b: Self) Self {
+                    var result: Self = undefined;
+                    inline for (fields) |fld| {
+                        @field(result, fld.name) = @divFloor(@field(a, fld.name), @field(b, fld.name));
+                    }
+                    return result;
+                }
+
+                /// @divTruncs all components from `a` by the components of `b`.
+                pub fn div_trunc(a: Self, b: Self) Self {
+                    var result: Self = undefined;
+                    inline for (fields) |fld| {
+                        @field(result, fld.name) = @divTrunc(@field(a, fld.name), @field(b, fld.name));
                     }
                     return result;
                 }
